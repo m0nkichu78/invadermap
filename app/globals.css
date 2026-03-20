@@ -14,7 +14,7 @@
   --card-foreground: 214 27% 90%;
   --popover: 240 30% 8%;
   --popover-foreground: 214 27% 90%;
-  --primary: 234 90% 73%;
+  --primary: 24 95% 53%;
   --primary-foreground: 239 38% 5%;
   --secondary: 240 30% 12%;
   --secondary-foreground: 214 27% 90%;
@@ -23,7 +23,7 @@
   --destructive: 0 91% 71%;
   --destructive-foreground: 214 27% 90%;
   --input: 239 38% 5%;
-  --ring: 234 90% 73%;
+  --ring: 24 95% 53%;
   --radius: 0.5rem;
 
   /* Terminal Minimal design tokens */
@@ -32,8 +32,8 @@
   --surface-2:    #141428;
   --border:       #1c1c32;
   --border-hover: #28284a;
-  --accent:       #818cf8;
-  --accent-dim:   #1e1b4b;
+  --accent:       #f97316;
+  --accent-dim:   #431407;
   --accent-2:     #34d399;
   --text:         #e2e8f0;
   --text-muted:   #4a5568;
@@ -64,15 +64,15 @@
 @layer utilities {
   .gradient-mesh {
     background:
-      radial-gradient(ellipse at 15% 60%, rgba(129,140,248,0.05) 0%, transparent 55%),
+      radial-gradient(ellipse at 15% 60%, rgba(249,115,22,0.05) 0%, transparent 55%),
       radial-gradient(ellipse at 85% 15%, rgba(52,211,153,0.03) 0%, transparent 55%),
       var(--bg);
   }
   .glow-accent {
-    box-shadow: 0 0 20px rgba(129, 140, 248, 0.12);
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.12);
   }
   .glow-accent-strong {
-    box-shadow: 0 0 40px rgba(129, 140, 248, 0.2);
+    box-shadow: 0 0 40px rgba(249, 115, 22, 0.2);
   }
 }
 
@@ -182,7 +182,7 @@ input[type="range"].accent-slider::-webkit-slider-thumb {
   background: var(--accent);
   cursor: pointer;
   border: none;
-  box-shadow: 0 0 6px rgba(129, 140, 248, 0.4);
+  box-shadow: 0 0 6px rgba(249, 115, 22, 0.4);
 }
 input[type="range"].accent-slider::-moz-range-thumb {
   width: 16px;
@@ -191,7 +191,7 @@ input[type="range"].accent-slider::-moz-range-thumb {
   background: var(--accent);
   cursor: pointer;
   border: none;
-  box-shadow: 0 0 6px rgba(129, 140, 248, 0.4);
+  box-shadow: 0 0 6px rgba(249, 115, 22, 0.4);
 }
 
 /* ── User location marker ─────────────────────────────────────────────────── */
@@ -203,7 +203,7 @@ input[type="range"].accent-slider::-moz-range-thumb {
 .user-marker__dot {
   width: 12px;
   height: 12px;
-  background: #818cf8;
+  background: #f97316;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.8);
   position: absolute;
@@ -214,7 +214,7 @@ input[type="range"].accent-slider::-moz-range-thumb {
 .user-marker__pulse {
   width: 20px;
   height: 20px;
-  background: rgba(129, 140, 248, 0.3);
+  background: rgba(249, 115, 22, 0.3);
   border-radius: 50%;
   position: absolute;
   top: 0;

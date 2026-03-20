@@ -4,7 +4,7 @@ import { STATUS_HEX } from "@/lib/utils/statusStyle";
 
 const SCAN_COLOR: Record<ScanStatus, string> = {
   scanned:   "#34d399",
-  seen:      "#818cf8",
+  seen:      "#f97316",
   not_found: "#4a5568",
 };
 

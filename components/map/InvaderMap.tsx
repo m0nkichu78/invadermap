@@ -26,7 +26,7 @@ const MAX_MARKERS = 300;
 
 const SCAN_COLOR: Record<ScanStatus, string> = {
   scanned:   "#34d399",
-  seen:      "#818cf8",
+  seen:      "#f97316",
   not_found: "#4a5568",
 };
 
@@ -36,7 +36,7 @@ const PC = {
   border:   "#1c1c32",
   text:     "#e2e8f0",
   muted:    "#4a5568",
-  accent:   "#818cf8",
+  accent:   "#f97316",
   success:  "#34d399",
   danger:   "#f87171",
   warning:  "#fb923c",
@@ -68,7 +68,7 @@ const SCAN_BUTTONS: {
   activeBg: string;
 }[] = [
   { status: "scanned",   Icon: CheckCircle, activeColor: "#34d399", activeBg: "rgba(52,211,153,0.12)"  },
-  { status: "seen",      Icon: Eye,         activeColor: "#818cf8", activeBg: "rgba(129,140,248,0.12)" },
+  { status: "seen",      Icon: Eye,         activeColor: "#f97316", activeBg: "rgba(249,115,22,0.12)" },
   { status: "not_found", Icon: X,           activeColor: "#f87171", activeBg: "rgba(248,113,113,0.12)" },
 ];
 
@@ -331,7 +331,7 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
         source: "invaders",
         filter: ["has", "point_count"],
         paint: {
-          "circle-color": "#818cf8",
+          "circle-color": "#f97316",
           "circle-radius": ["interpolate", ["linear"], ["get", "point_count"], 10, 28, 100, 48],
           "circle-blur": 1,
           "circle-opacity": 0.2,
@@ -344,7 +344,7 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
         source: "invaders",
         filter: ["has", "point_count"],
         paint: {
-          "circle-color": "#818cf8",
+          "circle-color": "#f97316",
           "circle-radius": ["step", ["get", "point_count"], 18, 10, 24, 100, 32, 500, 38],
           "circle-opacity": 0.85,
           "circle-stroke-width": 1,
