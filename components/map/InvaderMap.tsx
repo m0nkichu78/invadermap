@@ -470,7 +470,7 @@ export default function InvaderMap() {
 
         // Collect invaders within viewport that pass the active filter
         const inBounds = mappableInvaders.filter(
-          (inv) => filteredIds.has(inv.id) && bounds.contains([inv.lng!, inv.lat!])
+          (inv) => filteredIds.has(inv.id) && bounds?.contains([inv.lng!, inv.lat!])
         );
 
         // Sort by distance to viewport center, cap at MAX_MARKERS
@@ -548,9 +548,10 @@ export default function InvaderMap() {
       locateUser();
     });
 
+    const markers = markersRef.current;
     return () => {
-      markersRef.current.forEach((m) => m.remove());
-      markersRef.current.clear();
+      markers.forEach((m) => m.remove());
+      markers.clear();
       updateMarkersRef.current = null;
       map.remove();
       mapRef.current = null;
