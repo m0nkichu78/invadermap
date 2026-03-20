@@ -14,7 +14,12 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "InvaderMap",
-  description: "Track Space Invaders street art around the world",
+  description: "Discover and track Space Invaders mosaics worldwide",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
@@ -24,6 +29,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" className={jetbrainsMono.variable}>
+      <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="InvaderMap" />
+        <meta name="theme-color" content="#07070f" />
+      </head>
       <body style={{ fontFamily: "var(--font-mono), monospace" }}>
         <div className="relative min-h-screen">
           <AuthInitializer />

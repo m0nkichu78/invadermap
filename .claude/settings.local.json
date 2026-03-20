@@ -28,7 +28,9 @@
       "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && npm install framer-motion 2>&1 | tail -4)",
       "Bash(grep -r \"gradient-primary\\\\|gradient-card\\\\|glow-border\\\\|text-gradient-primary\\\\|gradient-glow\\\\|Space_Grotesk\\\\|font-space-grotesk\\\\|--color-\\\\|rounded-2xl\\\\|violet-slider\\\\|@heroicons\\\\|explore.*href\\\\|href.*explore\" \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" --include=\"*.tsx\" --include=\"*.ts\" --include=\"*.css\" -l 2>/dev/null | grep -v node_modules)",
       "Bash(grep -r \"Space.Grotesk\\\\|space-grotesk\\\\|font-space\\\\|Inter\\\\|system-ui\" \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" --include=\"*.tsx\" --include=\"*.ts\" --include=\"*.css\" 2>/dev/null | grep -v node_modules | grep -v \".next\")",
-      "Bash(node -e \"\nconst data = require\\('/Users/mathieu/Documents/Projets\\\\ IA\\\\ 🤖/invadermap/data/world_space_invaders.json'\\);\nconst codes = [...new Set\\(data.map\\(i => i.city\\)\\)].sort\\(\\);\nconsole.log\\(codes.join\\('\\\\n'\\)\\);\nconsole.log\\('Total:', codes.length\\);\n\")"
+      "Bash(node -e \"\nconst data = require\\('/Users/mathieu/Documents/Projets\\\\ IA\\\\ 🤖/invadermap/data/world_space_invaders.json'\\);\nconst codes = [...new Set\\(data.map\\(i => i.city\\)\\)].sort\\(\\);\nconsole.log\\(codes.join\\('\\\\n'\\)\\);\nconsole.log\\('Total:', codes.length\\);\n\")",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && npm install --save-dev sharp 2>&1 | tail -5)",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && npm run icons)"
     ]
   }
 }
