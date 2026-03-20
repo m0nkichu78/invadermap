@@ -128,48 +128,22 @@ export default function CollectionPage() {
   const isLoading = useUserStore((s) => s.isLoading);
   const [activeTab, setActiveTab] = useState<FilterTab>("Tous");
 
-  if (isLoading) {
-    return (
-      <div className="flex h-dvh items-center justify-center bg-[--bg]">
-        <div className="h-5 w-5 rounded-full border-2 border-accent border-t-transparent animate-spin" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="flex h-dvh flex-col items-center justify-center gap-4 bg-[--bg] px-6 pb-16">
-        <h1 className="text-sm uppercase tracking-widest text-[--text-muted]">collection</h1>
-        <p className="text-xs text-[--text-muted] text-center">
-          connectez-vous pour suivre vos captures et votre score.
-        </p>
-        <AuthModal open={true} onOpenChange={() => {}} embedded />
-      </div>
-    );
-  }
-
-  const collection: CollectionItem[] = Object.entries(scans)
-    .map(([invaderId, scanStatus]) => ({
-      invader: getInvaderById(invaderId),
-      scanStatus,
-    }))
-    .filter(
-      (item): item is CollectionItem => item.invader !== undefined
-    );
-
-  const counts = {
-    scanned:   collection.filter((i) => i.scanStatus === "scanned").length,
-    seen:      collection.filter((i) => i.scanStatus === "seen").length,
-    not_found: collection.filter((i) => i.scanStatus === "not_found").length,
-  };
-  const totalScore = collection
-    .filter((i) => i.scanStatus === "scanned")
-    .reduce((sum, i) => sum + i.invader.points, 0);
+  const collection: CollectionItem[] = useMemo(
+    () =>
+      Object.entries(scans)
+        .map(([invaderId, scanStatus]) => ({
+          invader: getInvaderById(invaderId),
+          scanStatus,
+        }))
+        .filter((item): item is CollectionItem => item.invader !== undefined),
+    [scans]
+  );
 
   const filterStatus = TAB_TO_STATUS[activeTab];
-  const filtered = filterStatus
-    ? collection.filter((i) => i.scanStatus === filterStatus)
-    : collection;
+  const filtered = useMemo(
+    () => (filterStatus ? collection.filter((i) => i.scanStatus === filterStatus) : collection),
+    [collection, filterStatus]
+  );
 
   // Group filtered items by city, sorted by id ascending within each group
   const groups = useMemo(() => {
@@ -190,6 +164,35 @@ export default function CollectionPage() {
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtered]);
+
+  const counts = {
+    scanned:   collection.filter((i) => i.scanStatus === "scanned").length,
+    seen:      collection.filter((i) => i.scanStatus === "seen").length,
+    not_found: collection.filter((i) => i.scanStatus === "not_found").length,
+  };
+  const totalScore = collection
+    .filter((i) => i.scanStatus === "scanned")
+    .reduce((sum, i) => sum + i.invader.points, 0);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-dvh items-center justify-center bg-[--bg]">
+        <div className="h-5 w-5 rounded-full border-2 border-accent border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex h-dvh flex-col items-center justify-center gap-4 bg-[--bg] px-6 pb-16">
+        <h1 className="text-sm uppercase tracking-widest text-[--text-muted]">collection</h1>
+        <p className="text-xs text-[--text-muted] text-center">
+          connectez-vous pour suivre vos captures et votre score.
+        </p>
+        <AuthModal open={true} onOpenChange={() => {}} embedded />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-dvh gradient-mesh pb-20">
