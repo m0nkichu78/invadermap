@@ -2,26 +2,194 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mapbox GL CSS */
+@import "mapbox-gl/dist/mapbox-gl.css";
+
+/* ── Design tokens ────────────────────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* shadcn compat — HSL values mapped to new palette */
+  --background: 239 38% 5%;
+  --foreground: 214 27% 90%;
+  --card: 240 30% 8%;
+  --card-foreground: 214 27% 90%;
+  --popover: 240 30% 8%;
+  --popover-foreground: 214 27% 90%;
+  --primary: 234 90% 73%;
+  --primary-foreground: 239 38% 5%;
+  --secondary: 240 30% 12%;
+  --secondary-foreground: 214 27% 90%;
+  --muted: 240 30% 12%;
+  --muted-foreground: 220 9% 35%;
+  --destructive: 0 91% 71%;
+  --destructive-foreground: 214 27% 90%;
+  --input: 239 38% 5%;
+  --ring: 234 90% 73%;
+  --radius: 0.5rem;
+
+  /* Terminal Minimal design tokens */
+  --bg:           #07070f;
+  --surface:      #0e0e1c;
+  --surface-2:    #141428;
+  --border:       #1c1c32;
+  --border-hover: #28284a;
+  --accent:       #818cf8;
+  --accent-dim:   #1e1b4b;
+  --accent-2:     #34d399;
+  --text:         #e2e8f0;
+  --text-muted:   #4a5568;
+  --danger:       #f87171;
+  --warning:      #fb923c;
+  --success:      #34d399;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ── Font enforcement — total override ────────────────────────────────────── */
+/* !important overrides third-party injected styles (shadcn, Mapbox popups, Radix) */
+* {
+  font-family: var(--font-mono), monospace !important;
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-feature-settings: "liga" 1, "calt" 1;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
+/* ── Utilities ────────────────────────────────────────────────────────────── */
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .gradient-mesh {
+    background:
+      radial-gradient(ellipse at 15% 60%, rgba(129,140,248,0.05) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 15%, rgba(52,211,153,0.03) 0%, transparent 55%),
+      var(--bg);
   }
+  .glow-accent {
+    box-shadow: 0 0 20px rgba(129, 140, 248, 0.12);
+  }
+  .glow-accent-strong {
+    box-shadow: 0 0 40px rgba(129, 140, 248, 0.2);
+  }
+}
+
+/* ── Mapbox chrome ────────────────────────────────────────────────────────── */
+.mapboxgl-ctrl-logo { display: none !important; }
+.mapboxgl-ctrl-attrib { display: none !important; }
+
+/* ── Mapbox popup ─────────────────────────────────────────────────────────── */
+.invader-popup .mapboxgl-popup-content {
+  background: transparent;
+  padding: 0;
+  border-radius: 8px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    0 0 0 1px #1c1c32;
+  overflow: hidden;
+}
+
+.invader-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip,
+.invader-popup.mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-tip,
+.invader-popup.mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
+  border-top-color: #141428;
+}
+
+.invader-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-tip,
+.invader-popup.mapboxgl-popup-anchor-top-left .mapboxgl-popup-tip,
+.invader-popup.mapboxgl-popup-anchor-top-right .mapboxgl-popup-tip {
+  border-bottom-color: #0e0e1c;
+}
+
+.invader-popup .mapboxgl-popup-close-button {
+  display: none;
+}
+
+/* Font override for Mapbox popup DOM (belt-and-suspenders alongside the * rule) */
+.mapboxgl-popup-content,
+.mapboxgl-popup * {
+  font-family: var(--font-mono), monospace !important;
+}
+
+/* ── HTML Markers ─────────────────────────────────────────────────────────── */
+.invader-marker {
+  cursor: pointer;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.invader-marker__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--dot-color, #4a5568);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: transform 0.15s ease;
+}
+.invader-marker:hover .invader-marker__dot {
+  transform: scale(1.4);
+}
+.invader-marker__dot::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: var(--dot-color, #4a5568);
+  opacity: 0.2;
+  filter: blur(3px);
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.invader-marker:hover .invader-marker__dot::after {
+  opacity: 0.4;
+}
+.invader-marker__check {
+  width: 6px;
+  height: 6px;
+  color: #07070f;
+  display: none;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+.invader-marker--scanned .invader-marker__check {
+  display: block;
+}
+
+/* ── Range slider ─────────────────────────────────────────────────────────── */
+input[type="range"].accent-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--border);
+  outline: none;
+}
+input[type="range"].accent-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 6px rgba(129, 140, 248, 0.4);
+}
+input[type="range"].accent-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 6px rgba(129, 140, 248, 0.4);
 }
