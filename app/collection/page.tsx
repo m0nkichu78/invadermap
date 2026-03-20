@@ -157,7 +157,7 @@ export default function CollectionPage() {
       items.sort((a, b) => a.invader.id.localeCompare(b.invader.id));
     }
     // Sort cities: most scanned first
-    return [...map.entries()].sort((a, b) => {
+    return Array.from(map.entries()).sort((a, b) => {
       const aS = a[1].filter((i) => i.scanStatus === "scanned").length;
       const bS = b[1].filter((i) => i.scanStatus === "scanned").length;
       return bS - aS;
