@@ -1,14 +1,17 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, CaretRight } from "@phosphor-icons/react/dist/ssr";
+import { CaretRight } from "@phosphor-icons/react/dist/ssr";
 import { createClient } from "@/lib/supabase/server";
 import { mappableInvaders } from "@/lib/data/invaders";
 import { haversineDistance } from "@/lib/utils/distance";
 import { getStatusBadgeClass } from "@/lib/utils/statusStyle";
+import { getCityName } from "@/lib/data/cityNames";
 import { ScanButtons } from "@/components/invader/ScanButtons";
 import { CopyCoords } from "@/components/invader/CopyCoords";
 import { DistanceDisplay } from "@/components/invader/DistanceDisplay";
 import { NearbyInvadersScroll } from "@/components/invader/NearbyInvadersScroll";
+import { BackButton } from "@/components/ui/BackButton";
+import { ViewOnMapButton } from "@/components/invader/ViewOnMapButton";
 import type { NearbyInvader } from "@/components/invader/NearbyInvadersScroll";
 
 export default async function InvaderPage({
@@ -45,17 +48,13 @@ export default async function InvaderPage({
     <div className="min-h-dvh bg-[--bg] pb-24">
       {/* Top bar */}
       <div className="sticky top-0 z-10 flex items-center gap-3 px-4 pt-10 pb-3 bg-[--bg]/95 backdrop-blur-sm border-b border-[--border]">
-        <Link
-          href="/"
-          className="flex items-center justify-center h-8 w-8 rounded bg-[--surface] border border-[--border] text-[--text-muted] hover:text-[--text] transition-colors duration-150"
-        >
-          <ArrowLeft weight="regular" className="h-4 w-4" />
-        </Link>
-        <p className="text-xs text-[--text-muted] uppercase tracking-widest truncate">{invader.city}</p>
+        <BackButton />
+        <p className="text-xs text-[--text-muted] uppercase tracking-widest truncate">
+          {getCityName(invader.city)}
+        </p>
       </div>
 
       <div className="px-4 pt-6 pb-4 border-b border-[--border]">
-        {/* Hero ID */}
         <p className="text-5xl font-bold tracking-tighter text-accent leading-none mb-3">
           {invader.id}
         </p>
@@ -81,13 +80,14 @@ export default async function InvaderPage({
       </div>
 
       <div className="px-4 pt-5 flex flex-col gap-5">
-        {/* Scan status */}
         <div className="flex flex-col gap-2">
           <p className="text-[10px] text-[--text-muted] uppercase tracking-widest">statut</p>
           <ScanButtons invaderId={invader.id} />
+          {invader.lat && invader.lng && (
+            <ViewOnMapButton lat={invader.lat} lng={invader.lng} id={invader.id} />
+          )}
         </div>
 
-        {/* Nearby */}
         {nearby.length > 0 && (
           <div className="flex flex-col gap-2">
             <p className="text-[10px] text-[--text-muted] uppercase tracking-widest">à proximité</p>
@@ -95,14 +95,13 @@ export default async function InvaderPage({
           </div>
         )}
 
-        {/* City link */}
         <Link
           href={`/city/${invader.city}`}
           className="flex items-center justify-between px-3 py-3 rounded-lg bg-[--surface] border border-[--border] hover:border-[--border-hover] transition-colors duration-150"
         >
           <span className="text-xs text-[--text-muted]">
             tous les invaders de{" "}
-            <span className="text-[--text]">{invader.city}</span>
+            <span className="text-[--text]">{getCityName(invader.city)}</span>
           </span>
           <CaretRight weight="regular" className="h-4 w-4 text-[--text-muted]" />
         </Link>

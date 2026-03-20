@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
 import { invadersByCity } from "@/lib/data/invaders";
+import { getCityName } from "@/lib/data/cityNames";
 import { getStatusDotClass } from "@/lib/utils/statusStyle";
+import { BackButton } from "@/components/ui/BackButton";
 
 function MiniStatusBar({ ok, damaged, destroyed, total }: {
   ok: number; damaged: number; destroyed: number; total: number;
@@ -29,26 +30,19 @@ export default function CityPage({ params }: { params: { slug: string } }) {
   const destroyed = invaders.filter((i) => i.status === "destroyed").length;
   const activePct = Math.round((ok / invaders.length) * 100);
 
-  const sorted = [...invaders].sort((a, b) => {
-    if (a.status === "OK" && b.status !== "OK") return -1;
-    if (b.status === "OK" && a.status !== "OK") return 1;
-    return b.points - a.points;
-  });
+  const sorted = [...invaders].sort((a, b) => b.id.localeCompare(a.id));
 
   return (
     <div className="min-h-dvh bg-[--bg] pb-24">
-      {/* Top bar */}
       <div className="sticky top-0 z-10 bg-[--bg]/95 backdrop-blur-sm border-b border-[--border] px-4 pt-10 pb-3">
         <div className="flex items-center gap-3 mb-2">
-          <Link
-            href="/cities"
-            className="flex items-center justify-center h-8 w-8 rounded bg-[--surface] border border-[--border] text-[--text-muted] hover:text-[--text] transition-colors duration-150"
-          >
-            <ArrowLeft weight="regular" className="h-4 w-4" />
-          </Link>
+          <BackButton />
           <div>
             <p className="text-[10px] text-[--text-muted] uppercase tracking-widest leading-none mb-0.5">Villes</p>
-            <h1 className="text-xl font-bold text-[--text] tracking-tight leading-none">{cityCode}</h1>
+            <h1 className="text-xl font-bold text-[--text] tracking-tight leading-none">
+              {getCityName(cityCode)}
+              <span className="ml-2 text-sm font-normal text-[--text-muted]">{cityCode}</span>
+            </h1>
           </div>
         </div>
 
@@ -58,15 +52,9 @@ export default function CityPage({ params }: { params: { slug: string } }) {
           <span className="text-accent">{invaders.reduce((s, i) => s + i.points, 0).toLocaleString()}</span> pts
         </p>
 
-        <MiniStatusBar
-          ok={ok}
-          damaged={damaged}
-          destroyed={destroyed}
-          total={invaders.length}
-        />
+        <MiniStatusBar ok={ok} damaged={damaged} destroyed={destroyed} total={invaders.length} />
       </div>
 
-      {/* Grid */}
       <div className="px-3 pt-4">
         <div className="grid grid-cols-3 gap-2">
           {sorted.map((inv) => (

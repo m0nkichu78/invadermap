@@ -2,7 +2,6 @@ import { create } from "zustand";
 
 export type StatusFilterKey = "Tous" | "Actifs" | "Endommagés" | "Détruits" | "Cachés";
 
-/** Maps each filter label to the raw status values it matches (null = no filter). */
 export const STATUS_FILTER_MAP: Record<StatusFilterKey, string[] | null> = {
   Tous: null,
   Actifs: ["OK"],
@@ -19,15 +18,18 @@ export function formatRadius(meters: number): string {
 }
 
 interface MapState {
-  userPosition: [number, number] | null; // [lng, lat]
+  userPosition: [number, number] | null;
   proximityRadius: RadiusStep;
   proximityActive: boolean;
   statusFilter: StatusFilterKey;
+  lastCenter: [number, number] | null;
+  lastZoom: number;
 
   setUserPosition: (pos: [number, number] | null) => void;
   setProximityRadius: (radius: RadiusStep) => void;
   setProximityActive: (active: boolean) => void;
   setStatusFilter: (filter: StatusFilterKey) => void;
+  setLastView: (center: [number, number], zoom: number) => void;
 }
 
 export const useMapStore = create<MapState>((set) => ({
@@ -35,9 +37,12 @@ export const useMapStore = create<MapState>((set) => ({
   proximityRadius: 500,
   proximityActive: false,
   statusFilter: "Tous",
+  lastCenter: null,
+  lastZoom: 12,
 
   setUserPosition: (pos) => set({ userPosition: pos }),
   setProximityRadius: (radius) => set({ proximityRadius: radius }),
   setProximityActive: (active) => set({ proximityActive: active }),
   setStatusFilter: (filter) => set({ statusFilter: filter }),
+  setLastView: (center, zoom) => set({ lastCenter: center, lastZoom: zoom }),
 }));

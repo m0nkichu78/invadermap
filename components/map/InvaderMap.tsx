@@ -17,26 +17,19 @@ import { createMarkerElement, setMarkerScan } from "@/lib/map/createMarker";
 import { StatusFilterBar } from "./StatusFilterBar";
 import { ProximityButton } from "./ProximityButton";
 
-// ── Token ─────────────────────────────────────────────────────────────────────
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
 
 const PARIS: [number, number] = [2.3488, 48.8534];
 const DEFAULT_ZOOM = 12;
-
-// Zoom threshold: below → GL circle layer; at/above → HTML markers
 const MARKER_ZOOM = 13;
-
-// Cap on simultaneous HTML markers (closest-to-center priority)
 const MAX_MARKERS = 300;
 
-// Scan colors for the GL unclustered-point layer (zoom < MARKER_ZOOM)
 const SCAN_COLOR: Record<ScanStatus, string> = {
   scanned:   "#34d399",
   seen:      "#818cf8",
   not_found: "#4a5568",
 };
 
-// ── Popup colors (hardcoded for inline styles) ─────────────────────────────
 const PC = {
   bg:       "#0e0e1c",
   surface2: "#141428",
@@ -50,7 +43,6 @@ const PC = {
 };
 const POPUP_FONT = "var(--font-mono, 'JetBrains Mono', Consolas, monospace)";
 
-// ── Status badge style parser ──────────────────────────────────────────────
 function parseInlineBadgeStyle(inlineStr: string): React.CSSProperties {
   const result: React.CSSProperties = {};
   inlineStr.split(";").forEach((part) => {
@@ -62,7 +54,6 @@ function parseInlineBadgeStyle(inlineStr: string): React.CSSProperties {
   return result;
 }
 
-// ── Popup React component ──────────────────────────────────────────────────
 interface PopupContentProps {
   id: string;
   status: InvaderStatus;
@@ -135,16 +126,11 @@ function PopupContent({ id, status, isLoggedIn, currentScan }: PopupContentProps
                 onClick={() => handleScan(s)}
                 disabled={pending}
                 style={{
-                  flex: 1,
-                  height: "36px",
-                  borderRadius: "6px",
-                  border: "none",
+                  flex: 1, height: "36px", borderRadius: "6px", border: "none",
                   background: active ? activeBg : PC.surface2,
                   color: active ? activeColor : PC.muted,
                   cursor: pending ? "default" : "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  display: "flex", alignItems: "center", justifyContent: "center",
                   transition: "all 0.15s",
                   opacity: pending && !active ? 0.5 : 1,
                 }}
@@ -166,17 +152,10 @@ function PopupContent({ id, status, isLoggedIn, currentScan }: PopupContentProps
   );
 }
 
-// ── Pre-computed base GeoJSON features ─────────────────────────────────────
 const allFeatures: GeoJSON.Feature[] = mappableInvaders.map((inv) => ({
   type: "Feature",
   geometry: { type: "Point", coordinates: [inv.lng as number, inv.lat as number] },
-  properties: {
-    id: inv.id,
-    city: inv.city,
-    status: inv.status,
-    points: inv.points,
-    hint: inv.hint ?? "",
-  },
+  properties: { id: inv.id, city: inv.city, status: inv.status, points: inv.points, hint: inv.hint ?? "" },
 }));
 
 function computeFilteredGeojson(
@@ -187,32 +166,23 @@ function computeFilteredGeojson(
   userScans: Record<string, ScanStatus>
 ): GeoJSON.FeatureCollection {
   let features = allFeatures;
-
   const allowedStatuses = STATUS_FILTER_MAP[statusFilter];
   if (allowedStatuses !== null) {
-    features = features.filter((f) =>
-      allowedStatuses.includes(f.properties!.status as string)
-    );
+    features = features.filter((f) => allowedStatuses.includes(f.properties!.status as string));
   }
-
   if (proximityActive && userPosition) {
     features = features.filter((f) => {
       const [lng, lat] = (f.geometry as GeoJSON.Point).coordinates;
       return haversineDistance(userPosition[1], userPosition[0], lat, lng) <= proximityRadius;
     });
   }
-
   const hasScans = Object.keys(userScans).length > 0;
   if (hasScans) {
     features = features.map((f) => ({
       ...f,
-      properties: {
-        ...f.properties,
-        userScanStatus: userScans[f.properties!.id as string] ?? null,
-      },
+      properties: { ...f.properties, userScanStatus: userScans[f.properties!.id as string] ?? null },
     }));
   }
-
   return { type: "FeatureCollection", features };
 }
 
@@ -223,31 +193,48 @@ function computeFilteredIds(
   statusFilter: StatusFilterKey
 ): Set<string> {
   let invaders = mappableInvaders;
-
   const allowedStatuses = STATUS_FILTER_MAP[statusFilter];
   if (allowedStatuses !== null) {
     invaders = invaders.filter((inv) => allowedStatuses.includes(inv.status));
   }
-
   if (proximityActive && userPosition) {
     invaders = invaders.filter((inv) =>
       haversineDistance(userPosition[1], userPosition[0], inv.lat!, inv.lng!) <= proximityRadius
     );
   }
-
   return new Set(invaders.map((inv) => inv.id));
 }
 
-// ── Component ─────────────────────────────────────────────────────────────
-export default function InvaderMap() {
+function createUserMarkerElement(): HTMLElement {
+  const el = document.createElement("div");
+  el.className = "user-marker";
+  const pulse = document.createElement("div");
+  pulse.className = "user-marker__pulse";
+  const dot = document.createElement("div");
+  dot.className = "user-marker__dot";
+  el.appendChild(pulse);
+  el.appendChild(dot);
+  return el;
+}
+
+interface InvaderMapProps {
+  initialLat?: number;
+  initialLng?: number;
+  initialId?: string;
+}
+
+export default function InvaderMap({ initialLat, initialLng, initialId }: InvaderMapProps = {}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
-  // Active HTML markers (only populated at zoom >= MARKER_ZOOM)
   const markersRef = useRef<Map<string, mapboxgl.Marker>>(new Map());
-  // IDs passing current status + proximity filter (updated by reactive effect)
   const filteredIdsRef = useRef<Set<string>>(new Set(mappableInvaders.map((i) => i.id)));
-  // Stable reference to the viewport marker updater (set after map load)
   const updateMarkersRef = useRef<(() => void) | null>(null);
+  const userMarkerRef = useRef<mapboxgl.Marker | null>(null);
+  const pendingFocusRef = useRef<{ lng: number; lat: number; id: string } | null>(
+    initialLat !== undefined && initialLng !== undefined
+      ? { lat: initialLat, lng: initialLng, id: initialId ?? "" }
+      : null
+  );
 
   const [mapLoaded, setMapLoaded] = useState(false);
 
@@ -256,6 +243,9 @@ export default function InvaderMap() {
   const proximityActive = useMapStore((s) => s.proximityActive);
   const statusFilter = useMapStore((s) => s.statusFilter);
   const setUserPosition = useMapStore((s) => s.setUserPosition);
+  const lastCenter = useMapStore((s) => s.lastCenter);
+  const lastZoom = useMapStore((s) => s.lastZoom);
+  const setLastView = useMapStore((s) => s.setLastView);
   const userScans = useUserStore((s) => s.scans);
 
   const flyTo = useCallback((center: [number, number], zoom?: number) => {
@@ -269,6 +259,19 @@ export default function InvaderMap() {
         const pos: [number, number] = [coords.longitude, coords.latitude];
         setUserPosition(pos);
         flyTo(pos, 14);
+
+        const map = mapRef.current;
+        if (!map) return;
+        if (!userMarkerRef.current) {
+          userMarkerRef.current = new mapboxgl.Marker({
+            element: createUserMarkerElement(),
+            anchor: "center",
+          })
+            .setLngLat(pos)
+            .addTo(map);
+        } else {
+          userMarkerRef.current.setLngLat(pos);
+        }
       },
       () => {}
     );
@@ -278,16 +281,12 @@ export default function InvaderMap() {
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-
-    // Update GeoJSON source (drives clusters + low-zoom GL circles)
     const source = map.getSource("invaders") as mapboxgl.GeoJSONSource | undefined;
     if (source) {
       source.setData(
         computeFilteredGeojson(userPosition, proximityRadius, proximityActive, statusFilter, userScans)
       );
     }
-
-    // Recompute which IDs pass the filter, then refresh HTML markers
     filteredIdsRef.current = computeFilteredIds(userPosition, proximityRadius, proximityActive, statusFilter);
     updateMarkersRef.current?.();
   }, [userPosition, proximityRadius, proximityActive, statusFilter, userScans]);
@@ -296,11 +295,15 @@ export default function InvaderMap() {
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
+    // Determine initial center/zoom: restore last view, or default to Paris
+    const initCenter: [number, number] = lastCenter ?? PARIS;
+    const initZoom = lastCenter ? lastZoom : DEFAULT_ZOOM;
+
     const map = new mapboxgl.Map({
       container: containerRef.current,
       style: "mapbox://styles/mapbox/dark-v11",
-      center: PARIS,
-      zoom: DEFAULT_ZOOM,
+      center: initCenter,
+      zoom: initZoom,
       attributionControl: false,
       logoPosition: "bottom-left",
     });
@@ -308,7 +311,6 @@ export default function InvaderMap() {
     mapRef.current = map;
 
     map.on("load", () => {
-      // ── GeoJSON source ─────────────────────────────────────────────────
       map.addSource("invaders", {
         type: "geojson",
         data: computeFilteredGeojson(
@@ -323,7 +325,6 @@ export default function InvaderMap() {
         clusterRadius: 50,
       });
 
-      // ── Cluster layers (all zoom levels) ───────────────────────────────
       map.addLayer({
         id: "clusters-glow",
         type: "circle",
@@ -359,8 +360,6 @@ export default function InvaderMap() {
         filter: ["has", "point_count"],
         layout: {
           "text-field": "{point_count_abbreviated}",
-          // Mapbox GL uses its own bundled font stack — custom web fonts (JetBrains Mono)
-          // cannot be used in GL symbol layers. DIN Offc Pro Bold is the closest clean fit.
           "text-font": ["DIN Offc Pro Bold", "Arial Unicode MS Bold"],
           "text-size": 11,
           "text-letter-spacing": 0,
@@ -368,8 +367,6 @@ export default function InvaderMap() {
         paint: { "text-color": "#ffffff" },
       });
 
-      // ── Individual points — GL circles (zoom < MARKER_ZOOM only) ──────
-      // Hidden at zoom >= MARKER_ZOOM where HTML markers take over.
       map.addLayer({
         id: "unclustered-point-glow",
         type: "circle",
@@ -378,13 +375,9 @@ export default function InvaderMap() {
         paint: {
           "circle-color": [
             "match", ["get", "status"],
-            "OK",               "#34d399",
-            "destroyed",        "#f87171",
-            "damaged",          "#fb923c",
-            "a little damaged", "#fb923c",
-            "very damaged",     "#fb923c",
-            "hidden",           "#4a5568",
-            "#4a5568",
+            "OK", "#34d399", "destroyed", "#f87171",
+            "damaged", "#fb923c", "a little damaged", "#fb923c", "very damaged", "#fb923c",
+            "hidden", "#4a5568", "#4a5568",
           ],
           "circle-radius": 14,
           "circle-blur": 1,
@@ -400,18 +393,14 @@ export default function InvaderMap() {
         paint: {
           "circle-color": [
             "case",
-            ["==", ["get", "userScanStatus"], "scanned"],   SCAN_COLOR.scanned,
-            ["==", ["get", "userScanStatus"], "seen"],      SCAN_COLOR.seen,
+            ["==", ["get", "userScanStatus"], "scanned"], SCAN_COLOR.scanned,
+            ["==", ["get", "userScanStatus"], "seen"],    SCAN_COLOR.seen,
             ["==", ["get", "userScanStatus"], "not_found"], SCAN_COLOR.not_found,
             [
               "match", ["get", "status"],
-              "OK",               "#34d399",
-              "destroyed",        "#f87171",
-              "damaged",          "#fb923c",
-              "a little damaged", "#fb923c",
-              "very damaged",     "#fb923c",
-              "hidden",           "#4a5568",
-              "#4a5568",
+              "OK", "#34d399", "destroyed", "#f87171",
+              "damaged", "#fb923c", "a little damaged", "#fb923c", "very damaged", "#fb923c",
+              "hidden", "#4a5568", "#4a5568",
             ],
           ],
           "circle-radius": 5,
@@ -427,7 +416,6 @@ export default function InvaderMap() {
         },
       });
 
-      // ── Open popup helper ──────────────────────────────────────────────
       function openPopup(inv: (typeof mappableInvaders)[0]) {
         const { user, scans } = useUserStore.getState();
         const container = document.createElement("div");
@@ -452,11 +440,8 @@ export default function InvaderMap() {
         popup.on("close", () => root.unmount());
       }
 
-      // ── HTML marker management (zoom >= MARKER_ZOOM, viewport-bounded) ─
       function updateMarkersForViewport() {
         const zoom = map.getZoom();
-
-        // Below threshold: GL circles are active, HTML markers are removed
         if (zoom < MARKER_ZOOM) {
           markersRef.current.forEach((m) => m.remove());
           markersRef.current.clear();
@@ -468,24 +453,18 @@ export default function InvaderMap() {
         const filteredIds = filteredIdsRef.current;
         const scans = useUserStore.getState().scans;
 
-        // Collect invaders within viewport that pass the active filter
         const inBounds = mappableInvaders.filter(
           (inv) => filteredIds.has(inv.id) && bounds?.contains([inv.lng!, inv.lat!])
         );
 
-        // Sort by distance to viewport center, cap at MAX_MARKERS
         const visible = inBounds
-          .map((inv) => ({
-            inv,
-            dist: haversineDistance(center.lat, center.lng, inv.lat!, inv.lng!),
-          }))
+          .map((inv) => ({ inv, dist: haversineDistance(center.lat, center.lng, inv.lat!, inv.lng!) }))
           .sort((a, b) => a.dist - b.dist)
           .slice(0, MAX_MARKERS)
           .map(({ inv }) => inv);
 
         const visibleIds = new Set(visible.map((inv) => inv.id));
 
-        // Remove markers that scrolled out of view or no longer pass the filter
         markersRef.current.forEach((marker, id) => {
           if (!visibleIds.has(id)) {
             marker.remove();
@@ -493,30 +472,29 @@ export default function InvaderMap() {
           }
         });
 
-        // Add new markers; update scan appearance on existing ones
         for (const inv of visible) {
           if (markersRef.current.has(inv.id)) {
             setMarkerScan(markersRef.current.get(inv.id)!.getElement(), scans[inv.id] ?? null);
             continue;
           }
-
           const el = createMarkerElement(inv.status, scans[inv.id] ?? null);
           el.addEventListener("click", (e) => { e.stopPropagation(); openPopup(inv); });
-
           const marker = new mapboxgl.Marker({ element: el, anchor: "center" })
             .setLngLat([inv.lng!, inv.lat!])
             .addTo(map);
-
           markersRef.current.set(inv.id, marker);
         }
       }
 
       updateMarkersRef.current = updateMarkersForViewport;
 
-      // Fire on every pan/zoom end — handles both viewport changes and zoom crossing
-      map.on("moveend", updateMarkersForViewport);
+      // Save last view on every moveend + update markers
+      map.on("moveend", () => {
+        const c = map.getCenter();
+        setLastView([c.lng, c.lat], map.getZoom());
+        updateMarkersForViewport();
+      });
 
-      // ── Click: cluster → zoom in ───────────────────────────────────────
       map.on("click", "clusters", (e) => {
         const features = map.queryRenderedFeatures(e.point, { layers: ["clusters"] });
         if (!features.length) return;
@@ -529,7 +507,6 @@ export default function InvaderMap() {
         });
       });
 
-      // ── Click: GL point → popup (only active at zoom < MARKER_ZOOM) ───
       map.on("click", "unclustered-point", (e) => {
         const feature = e.features?.[0];
         if (!feature) return;
@@ -538,25 +515,41 @@ export default function InvaderMap() {
         if (inv) openPopup(inv);
       });
 
-      // Cursor pointer for interactive layers
       for (const layer of ["clusters", "unclustered-point"]) {
         map.on("mouseenter", layer, () => { map.getCanvas().style.cursor = "pointer"; });
         map.on("mouseleave", layer, () => { map.getCanvas().style.cursor = ""; });
       }
 
       setMapLoaded(true);
-      locateUser();
+
+      // Handle "Voir sur la carte" navigation
+      const pending = pendingFocusRef.current;
+      if (pending) {
+        map.flyTo({ center: [pending.lng, pending.lat], zoom: 16, duration: 1200 });
+        map.once("moveend", () => {
+          if (pending.id) {
+            const inv = mappableInvaders.find((i) => i.id === pending.id);
+            if (inv) openPopup(inv);
+          }
+          pendingFocusRef.current = null;
+        });
+      } else {
+        locateUser();
+      }
     });
 
     const markers = markersRef.current;
     return () => {
       markers.forEach((m) => m.remove());
       markers.clear();
+      userMarkerRef.current?.remove();
+      userMarkerRef.current = null;
       updateMarkersRef.current = null;
       map.remove();
       mapRef.current = null;
     };
-  }, [locateUser]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="relative w-full" style={{ height: "100dvh" }}>
