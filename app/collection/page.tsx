@@ -153,7 +153,7 @@ export default function CollectionPage() {
       if (!map.has(city)) map.set(city, []);
       map.get(city)!.push(item);
     }
-    for (const items of map.values()) {
+    for (const items of Array.from(map.values())) {
       items.sort((a, b) => a.invader.id.localeCompare(b.invader.id));
     }
     // Sort cities: most scanned first
