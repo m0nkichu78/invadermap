@@ -24,12 +24,14 @@ interface MapState {
   statusFilter: StatusFilterKey;
   lastCenter: [number, number] | null;
   lastZoom: number;
+  isTracking: boolean;
 
   setUserPosition: (pos: [number, number] | null) => void;
   setProximityRadius: (radius: RadiusStep) => void;
   setProximityActive: (active: boolean) => void;
   setStatusFilter: (filter: StatusFilterKey) => void;
   setLastView: (center: [number, number], zoom: number) => void;
+  setTracking: (v: boolean) => void;
 }
 
 export const useMapStore = create<MapState>((set) => ({
@@ -39,10 +41,12 @@ export const useMapStore = create<MapState>((set) => ({
   statusFilter: "Tous",
   lastCenter: null,
   lastZoom: 12,
+  isTracking: false,
 
   setUserPosition: (pos) => set({ userPosition: pos }),
   setProximityRadius: (radius) => set({ proximityRadius: radius }),
   setProximityActive: (active) => set({ proximityActive: active }),
   setStatusFilter: (filter) => set({ statusFilter: filter }),
   setLastView: (center, zoom) => set({ lastCenter: center, lastZoom: zoom }),
+  setTracking: (v) => set({ isTracking: v }),
 }));

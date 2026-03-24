@@ -116,44 +116,44 @@
 /* ── HTML Markers ─────────────────────────────────────────────────────────── */
 .invader-marker {
   cursor: pointer;
-  width: 14px;
-  height: 14px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .invader-marker__dot {
-  width: 10px;
-  height: 10px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: var(--dot-color, #4a5568);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  transition: transform 0.15s ease;
+  transition: transform 150ms ease;
 }
 .invader-marker:hover .invader-marker__dot {
-  transform: scale(1.4);
+  transform: scale(1.2);
 }
 .invader-marker__dot::after {
   content: '';
   position: absolute;
-  inset: -4px;
+  inset: -5px;
   border-radius: 50%;
-  background: var(--dot-color, #4a5568);
+  background: inherit;
   opacity: 0.2;
-  filter: blur(3px);
+  filter: blur(5px);
   pointer-events: none;
-  transition: opacity 0.15s ease;
+  z-index: -1;
 }
 .invader-marker:hover .invader-marker__dot::after {
   opacity: 0.4;
 }
 .invader-marker__check {
-  width: 6px;
-  height: 6px;
+  width: 13px;
+  height: 13px;
   color: #07070f;
   display: none;
   position: relative;
@@ -201,8 +201,8 @@ input[type="range"].accent-slider::-moz-range-thumb {
   height: 20px;
 }
 .user-marker__dot {
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
   background: #f97316;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.8);

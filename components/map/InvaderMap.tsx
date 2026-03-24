@@ -14,6 +14,7 @@ import { haversineDistance } from "@/lib/utils/distance";
 import { upsertScan } from "@/lib/actions/scans";
 import { STATUS_BADGE_INLINE } from "@/lib/utils/statusStyle";
 import { createMarkerElement, setMarkerScan } from "@/lib/map/createMarker";
+import { createGeoJSONCircle } from "@/lib/map/geoUtils";
 import { StatusFilterBar } from "./StatusFilterBar";
 import { ProximityButton } from "./ProximityButton";
 
@@ -21,7 +22,7 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
 
 const PARIS: [number, number] = [2.3488, 48.8534];
 const DEFAULT_ZOOM = 12;
-const MARKER_ZOOM = 13;
+const MARKER_ZOOM = 12;
 const MAX_MARKERS = 300;
 
 const SCAN_COLOR: Record<ScanStatus, string> = {
@@ -230,6 +231,7 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
   const filteredIdsRef = useRef<Set<string>>(new Set(mappableInvaders.map((i) => i.id)));
   const updateMarkersRef = useRef<(() => void) | null>(null);
   const userMarkerRef = useRef<mapboxgl.Marker | null>(null);
+  const watchIdRef = useRef<number | null>(null);
   const pendingFocusRef = useRef<{ lng: number; lat: number; id: string } | null>(
     initialLat !== undefined && initialLng !== undefined
       ? { lat: initialLat, lng: initialLng, id: initialId ?? "" }
@@ -246,36 +248,83 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
   const lastCenter = useMapStore((s) => s.lastCenter);
   const lastZoom = useMapStore((s) => s.lastZoom);
   const setLastView = useMapStore((s) => s.setLastView);
+  const isTracking = useMapStore((s) => s.isTracking);
+  const setTracking = useMapStore((s) => s.setTracking);
   const userScans = useUserStore((s) => s.scans);
 
-  const flyTo = useCallback((center: [number, number], zoom?: number) => {
-    mapRef.current?.flyTo({ center, zoom: zoom ?? mapRef.current.getZoom(), duration: 1200 });
+  // ── Accuracy circle helper ─────────────────────────────────────────────────
+  const updateAccuracyCircle = useCallback((map: mapboxgl.Map, lngLat: [number, number], accuracyMeters: number) => {
+    const circle = createGeoJSONCircle(lngLat, accuracyMeters);
+    const source = map.getSource("user-accuracy") as mapboxgl.GeoJSONSource | undefined;
+    if (source) {
+      source.setData(circle);
+    } else {
+      map.addSource("user-accuracy", { type: "geojson", data: circle });
+      map.addLayer({
+        id: "user-accuracy-fill",
+        type: "fill",
+        source: "user-accuracy",
+        paint: { "fill-color": "#f97316", "fill-opacity": 0.08 },
+      });
+    }
   }, []);
 
-  const locateUser = useCallback(() => {
+  // ── Start watching geolocation ─────────────────────────────────────────────
+  const startWatch = useCallback(() => {
     if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
+    if (watchIdRef.current !== null) return; // already watching
+
+    watchIdRef.current = navigator.geolocation.watchPosition(
       ({ coords }) => {
-        const pos: [number, number] = [coords.longitude, coords.latitude];
-        setUserPosition(pos);
-        flyTo(pos, 14);
+        const { latitude, longitude, accuracy } = coords;
+        const lngLat: [number, number] = [longitude, latitude];
+        useMapStore.getState().setUserPosition(lngLat);
 
         const map = mapRef.current;
         if (!map) return;
-        if (!userMarkerRef.current) {
+
+        if (userMarkerRef.current) {
+          userMarkerRef.current.setLngLat(lngLat);
+        } else {
           userMarkerRef.current = new mapboxgl.Marker({
             element: createUserMarkerElement(),
             anchor: "center",
           })
-            .setLngLat(pos)
+            .setLngLat(lngLat)
             .addTo(map);
-        } else {
-          userMarkerRef.current.setLngLat(pos);
+        }
+
+        updateAccuracyCircle(map, lngLat, accuracy);
+
+        if (useMapStore.getState().isTracking) {
+          map.easeTo({ center: lngLat, duration: 800 });
         }
       },
-      () => {}
+      (err) => console.warn("Geolocation error:", err),
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
     );
-  }, [flyTo, setUserPosition]);
+  }, [updateAccuracyCircle]);
+
+  // ── Locate button handler ──────────────────────────────────────────────────
+  const handleLocate = useCallback(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (isTracking) {
+      // Second tap while tracking → stop following
+      setTracking(false);
+      return;
+    }
+
+    // Start watch if not already running
+    startWatch();
+
+    const pos = useMapStore.getState().userPosition;
+    if (pos) {
+      map.flyTo({ center: pos, zoom: 15, duration: 1200 });
+    }
+    setTracking(true);
+  }, [isTracking, setTracking, startWatch]);
 
   // ── Reactive: filter / scan changes ──────────────────────────────────────
   useEffect(() => {
@@ -332,7 +381,7 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
         filter: ["has", "point_count"],
         paint: {
           "circle-color": "#f97316",
-          "circle-radius": ["interpolate", ["linear"], ["get", "point_count"], 10, 28, 100, 48],
+          "circle-radius": ["interpolate", ["linear"], ["get", "point_count"], 2, 28, 10, 36, 50, 44, 100, 52],
           "circle-blur": 1,
           "circle-opacity": 0.2,
         },
@@ -345,7 +394,7 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
         filter: ["has", "point_count"],
         paint: {
           "circle-color": "#f97316",
-          "circle-radius": ["step", ["get", "point_count"], 18, 10, 24, 100, 32, 500, 38],
+          "circle-radius": ["interpolate", ["linear"], ["get", "point_count"], 2, 18, 10, 26, 50, 34, 100, 42],
           "circle-opacity": 0.85,
           "circle-stroke-width": 1,
           "circle-stroke-color": "#ffffff",
@@ -495,6 +544,11 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
         updateMarkersForViewport();
       });
 
+      // Stop tracking when user manually pans
+      map.on("dragstart", () => {
+        useMapStore.getState().setTracking(false);
+      });
+
       map.on("click", "clusters", (e) => {
         const features = map.queryRenderedFeatures(e.point, { layers: ["clusters"] });
         if (!features.length) return;
@@ -534,7 +588,7 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
           pendingFocusRef.current = null;
         });
       } else {
-        locateUser();
+        startWatch();
       }
     });
 
@@ -545,6 +599,10 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
       userMarkerRef.current?.remove();
       userMarkerRef.current = null;
       updateMarkersRef.current = null;
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
       map.remove();
       mapRef.current = null;
     };
@@ -572,11 +630,15 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
       <StatusFilterBar />
 
       <button
-        onClick={locateUser}
+        onClick={handleLocate}
         aria-label="Me localiser"
-        className="fixed bottom-[8rem] right-4 z-20 flex h-9 w-9 items-center justify-center rounded bg-[--surface] border border-[--border] text-[--text-muted] shadow-lg transition-colors duration-150 hover:text-[--text] hover:border-[--border-hover]"
+        className={`fixed bottom-[8rem] right-4 z-20 flex h-9 w-9 items-center justify-center rounded border shadow-lg transition-colors duration-150 ${
+          isTracking
+            ? "bg-[--accent-dim] border-accent text-accent glow-accent"
+            : "bg-[--surface] border-[--border] text-[--text-muted] hover:text-[--text] hover:border-[--border-hover]"
+        }`}
       >
-        <Crosshair weight="regular" className="h-4 w-4" />
+        <Crosshair weight={isTracking ? "fill" : "regular"} className="h-4 w-4" />
       </button>
     </div>
   );
