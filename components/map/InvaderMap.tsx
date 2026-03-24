@@ -244,7 +244,6 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
   const proximityRadius = useMapStore((s) => s.proximityRadius);
   const proximityActive = useMapStore((s) => s.proximityActive);
   const statusFilter = useMapStore((s) => s.statusFilter);
-  const setUserPosition = useMapStore((s) => s.setUserPosition);
   const lastCenter = useMapStore((s) => s.lastCenter);
   const lastZoom = useMapStore((s) => s.lastZoom);
   const setLastView = useMapStore((s) => s.setLastView);
