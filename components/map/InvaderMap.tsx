@@ -22,7 +22,7 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
 
 const PARIS: [number, number] = [2.3488, 48.8534];
 const DEFAULT_ZOOM = 12;
-const MARKER_ZOOM = 12;
+const MARKER_ZOOM = 14;
 const MAX_MARKERS = 300;
 
 const SCAN_COLOR: Record<ScanStatus, string> = {
@@ -369,7 +369,7 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
           useUserStore.getState().scans
         ),
         cluster: true,
-        clusterMaxZoom: 14,
+        clusterMaxZoom: 13,
         clusterRadius: 50,
       });
 
@@ -377,7 +377,7 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
         id: "clusters-glow",
         type: "circle",
         source: "invaders",
-        filter: ["has", "point_count"],
+        filter: ["all", ["has", "point_count"], ["<", ["zoom"], MARKER_ZOOM]],
         paint: {
           "circle-color": "#f97316",
           "circle-radius": ["interpolate", ["linear"], ["get", "point_count"], 2, 28, 10, 36, 50, 44, 100, 52],
@@ -390,7 +390,7 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
         id: "clusters",
         type: "circle",
         source: "invaders",
-        filter: ["has", "point_count"],
+        filter: ["all", ["has", "point_count"], ["<", ["zoom"], MARKER_ZOOM]],
         paint: {
           "circle-color": "#f97316",
           "circle-radius": ["interpolate", ["linear"], ["get", "point_count"], 2, 18, 10, 26, 50, 34, 100, 42],
@@ -405,7 +405,7 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
         id: "cluster-count",
         type: "symbol",
         source: "invaders",
-        filter: ["has", "point_count"],
+        filter: ["all", ["has", "point_count"], ["<", ["zoom"], MARKER_ZOOM]],
         layout: {
           "text-field": "{point_count_abbreviated}",
           "text-font": ["DIN Offc Pro Bold", "Arial Unicode MS Bold"],
@@ -536,6 +536,9 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
 
       updateMarkersRef.current = updateMarkersForViewport;
 
+      // Update markers on zoom (real-time, so they appear/hide without waiting for zoomend)
+      map.on("zoom", () => updateMarkersForViewport());
+
       // Save last view on every moveend + update markers
       map.on("moveend", () => {
         const c = map.getCenter();
@@ -574,6 +577,7 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
       }
 
       setMapLoaded(true);
+      updateMarkersForViewport();
 
       // Handle "Voir sur la carte" navigation
       const pending = pendingFocusRef.current;
