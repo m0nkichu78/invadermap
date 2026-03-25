@@ -54,6 +54,18 @@ export default async function InvaderPage({
         </p>
       </div>
 
+      {invader.image_url ? (
+        <img
+          src={invader.image_url}
+          alt={invader.id}
+          className="w-full aspect-square object-cover"
+        />
+      ) : (
+        <div className="w-full aspect-square bg-[--surface-2] flex items-center justify-center">
+          <span className="text-xs text-[--text-muted] font-mono">{invader.id}</span>
+        </div>
+      )}
+
       <div className="px-4 pt-6 pb-4 border-b border-[--border]">
         <p className="text-5xl font-bold tracking-tighter text-accent leading-none mb-3">
           {invader.id}
