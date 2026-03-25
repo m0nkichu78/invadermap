@@ -112,6 +112,7 @@ function PopupContent({ id, status, isLoggedIn, currentScan, imageUrl }: PopupCo
     >
       <div style={{ display: "flex", gap: "8px", alignItems: "flex-start", marginBottom: "8px" }}>
         {imageUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={imageUrl}
             alt={id}

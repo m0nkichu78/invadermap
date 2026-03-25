@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { CaretRight } from "@phosphor-icons/react/dist/ssr";
 import { createClient } from "@/lib/supabase/server";
@@ -81,10 +82,12 @@ export default async function InvaderPage({
             )}
           </div>
           {invader.image_url && (
-            <img
+            <Image
               src={invader.image_url}
               alt={invader.id}
-              className="w-24 h-24 rounded-lg object-cover flex-shrink-0"
+              width={96}
+              height={96}
+              className="rounded-lg object-cover flex-shrink-0"
             />
           )}
         </div>
