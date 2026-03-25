@@ -19,6 +19,7 @@ import { StatusFilterBar } from "./StatusFilterBar";
 import { ProximityButton } from "./ProximityButton";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
+const SUPABASE_STORAGE = `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? ""}/storage/v1/object/public/invader-photos`;
 
 const PARIS: [number, number] = [2.3488, 48.8534];
 const DEFAULT_ZOOM = 12;
@@ -60,6 +61,7 @@ interface PopupContentProps {
   status: InvaderStatus;
   isLoggedIn: boolean;
   currentScan: ScanStatus | null;
+  imageUrl?: string;
 }
 
 const SCAN_BUTTONS: {
@@ -73,9 +75,10 @@ const SCAN_BUTTONS: {
   { status: "not_found", Icon: X,           activeColor: "#f87171", activeBg: "rgba(248,113,113,0.12)" },
 ];
 
-function PopupContent({ id, status, isLoggedIn, currentScan }: PopupContentProps) {
+function PopupContent({ id, status, isLoggedIn, currentScan, imageUrl }: PopupContentProps) {
   const [scan, setScan] = useState<ScanStatus | null>(currentScan);
   const [pending, setPending] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   async function handleScan(s: ScanStatus) {
     if (pending) return;
@@ -107,15 +110,28 @@ function PopupContent({ id, status, isLoggedIn, currentScan }: PopupContentProps
         position: "relative",
       }}
     >
-      <a
-        href={`/invader/${id}`}
-        style={{ display: "block", fontWeight: 700, fontSize: "15px", color: PC.accent, textDecoration: "none", letterSpacing: "-0.02em", lineHeight: 1, marginBottom: "6px" }}
-      >
-        {id}
-      </a>
-      <span style={{ display: "inline-block", padding: "2px 6px", borderRadius: "3px", fontSize: "9px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", ...badgeStyle }}>
-        {status}
-      </span>
+      <div style={{ display: "flex", gap: "8px", alignItems: "flex-start", marginBottom: "8px" }}>
+        {imageUrl && (
+          <img
+            src={imageUrl}
+            alt={id}
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageLoaded(false)}
+            style={{ width: "48px", height: "48px", borderRadius: "6px", objectFit: "cover", flexShrink: 0, display: imageLoaded ? "block" : "none" }}
+          />
+        )}
+        <div>
+          <a
+            href={`/invader/${id}`}
+            style={{ display: "block", fontWeight: 700, fontSize: "15px", color: PC.accent, textDecoration: "none", letterSpacing: "-0.02em", lineHeight: 1, marginBottom: "6px" }}
+          >
+            {id}
+          </a>
+          <span style={{ display: "inline-block", padding: "2px 6px", borderRadius: "3px", fontSize: "9px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", ...badgeStyle }}>
+            {status}
+          </span>
+        </div>
+      </div>
       <div style={{ height: "1px", background: PC.border, margin: "8px 0" }} />
       {isLoggedIn ? (
         <div style={{ display: "flex", gap: "6px", justifyContent: "space-between" }}>
@@ -156,7 +172,7 @@ function PopupContent({ id, status, isLoggedIn, currentScan }: PopupContentProps
 const allFeatures: GeoJSON.Feature[] = mappableInvaders.map((inv) => ({
   type: "Feature",
   geometry: { type: "Point", coordinates: [inv.lng as number, inv.lat as number] },
-  properties: { id: inv.id, city: inv.city, status: inv.status, points: inv.points, hint: inv.hint ?? "" },
+  properties: { id: inv.id, city: inv.city, status: inv.status, points: inv.points, hint: inv.hint ?? "", image_url: `${SUPABASE_STORAGE}/${inv.city}/${inv.id}.jpg` },
 }));
 
 function computeFilteredGeojson(
@@ -483,6 +499,7 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
             status={inv.status}
             isLoggedIn={!!user}
             currentScan={scans[inv.id] ?? null}
+            imageUrl={`${SUPABASE_STORAGE}/${inv.city}/${inv.id}.jpg`}
           />
         );
         popup.on("close", () => root.unmount());

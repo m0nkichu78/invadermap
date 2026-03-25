@@ -54,41 +54,40 @@ export default async function InvaderPage({
         </p>
       </div>
 
-      {invader.image_url ? (
-        <img
-          src={invader.image_url}
-          alt={invader.id}
-          className="w-full aspect-square object-cover"
-        />
-      ) : (
-        <div className="w-full aspect-square bg-[--surface-2] flex items-center justify-center">
-          <span className="text-xs text-[--text-muted] font-mono">{invader.id}</span>
-        </div>
-      )}
-
       <div className="px-4 pt-6 pb-4 border-b border-[--border]">
-        <p className="text-5xl font-bold tracking-tighter text-accent leading-none mb-3">
-          {invader.id}
-        </p>
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className={`text-[10px] px-2 py-1 rounded uppercase tracking-wider font-medium ${statusBadge}`}>
-            {invader.status}
-          </span>
-          <span className="text-[10px] bg-[--accent-dim] text-accent px-2 py-1 rounded font-mono tracking-wider">
-            {invader.points} pts
-          </span>
-        </div>
-        {invader.hint && (
-          <p className="mt-3 text-xs text-[--text-muted] italic leading-relaxed">
-            {invader.hint}
-          </p>
-        )}
-        {invader.lat && invader.lng && (
-          <div className="flex items-center gap-4 flex-wrap mt-3">
-            <CopyCoords lat={invader.lat} lng={invader.lng} />
-            <DistanceDisplay lat={invader.lat} lng={invader.lng} />
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <p className="text-5xl font-bold tracking-tighter text-accent leading-none mb-3">
+              {invader.id}
+            </p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className={`text-[10px] px-2 py-1 rounded uppercase tracking-wider font-medium ${statusBadge}`}>
+                {invader.status}
+              </span>
+              <span className="text-[10px] bg-[--accent-dim] text-accent px-2 py-1 rounded font-mono tracking-wider">
+                {invader.points} pts
+              </span>
+            </div>
+            {invader.hint && (
+              <p className="mt-3 text-xs text-[--text-muted] italic leading-relaxed">
+                {invader.hint}
+              </p>
+            )}
+            {invader.lat && invader.lng && (
+              <div className="flex items-center gap-4 flex-wrap mt-3">
+                <CopyCoords lat={invader.lat} lng={invader.lng} />
+                <DistanceDisplay lat={invader.lat} lng={invader.lng} />
+              </div>
+            )}
           </div>
-        )}
+          {invader.image_url && (
+            <img
+              src={invader.image_url}
+              alt={invader.id}
+              className="w-24 h-24 rounded-lg object-cover flex-shrink-0"
+            />
+          )}
+        </div>
       </div>
 
       <div className="px-4 pt-5 flex flex-col gap-5">
