@@ -181,6 +181,7 @@ function computeFilteredGeojson(
   proximityRadius: number,
   proximityActive: boolean,
   statusFilter: StatusFilterKey,
+  hideScanned: boolean,
   userScans: Record<string, ScanStatus>
 ): GeoJSON.FeatureCollection {
   let features = allFeatures;
@@ -193,6 +194,9 @@ function computeFilteredGeojson(
       const [lng, lat] = (f.geometry as GeoJSON.Point).coordinates;
       return haversineDistance(userPosition[1], userPosition[0], lat, lng) <= proximityRadius;
     });
+  }
+  if (hideScanned) {
+    features = features.filter((f) => userScans[f.properties!.id as string] !== "scanned");
   }
   const hasScans = Object.keys(userScans).length > 0;
   if (hasScans) {
@@ -208,7 +212,9 @@ function computeFilteredIds(
   userPosition: [number, number] | null,
   proximityRadius: number,
   proximityActive: boolean,
-  statusFilter: StatusFilterKey
+  statusFilter: StatusFilterKey,
+  hideScanned: boolean,
+  userScans: Record<string, ScanStatus>
 ): Set<string> {
   let invaders = mappableInvaders;
   const allowedStatuses = STATUS_FILTER_MAP[statusFilter];
@@ -219,6 +225,9 @@ function computeFilteredIds(
     invaders = invaders.filter((inv) =>
       haversineDistance(userPosition[1], userPosition[0], inv.lat!, inv.lng!) <= proximityRadius
     );
+  }
+  if (hideScanned) {
+    invaders = invaders.filter((inv) => userScans[inv.id] !== "scanned");
   }
   return new Set(invaders.map((inv) => inv.id));
 }
@@ -261,6 +270,7 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
   const proximityRadius = useMapStore((s) => s.proximityRadius);
   const proximityActive = useMapStore((s) => s.proximityActive);
   const statusFilter = useMapStore((s) => s.statusFilter);
+  const hideScanned = useMapStore((s) => s.hideScanned);
   const lastCenter = useMapStore((s) => s.lastCenter);
   const lastZoom = useMapStore((s) => s.lastZoom);
   const setLastView = useMapStore((s) => s.setLastView);
@@ -349,12 +359,12 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
     const source = map.getSource("invaders") as mapboxgl.GeoJSONSource | undefined;
     if (source) {
       source.setData(
-        computeFilteredGeojson(userPosition, proximityRadius, proximityActive, statusFilter, userScans)
+        computeFilteredGeojson(userPosition, proximityRadius, proximityActive, statusFilter, hideScanned, userScans)
       );
     }
-    filteredIdsRef.current = computeFilteredIds(userPosition, proximityRadius, proximityActive, statusFilter);
+    filteredIdsRef.current = computeFilteredIds(userPosition, proximityRadius, proximityActive, statusFilter, hideScanned, userScans);
     updateMarkersRef.current?.();
-  }, [userPosition, proximityRadius, proximityActive, statusFilter, userScans]);
+  }, [userPosition, proximityRadius, proximityActive, statusFilter, hideScanned, userScans]);
 
   // ── Map initialization ────────────────────────────────────────────────────
   useEffect(() => {
@@ -383,6 +393,7 @@ export default function InvaderMap({ initialLat, initialLng, initialId }: Invade
           useMapStore.getState().proximityRadius,
           useMapStore.getState().proximityActive,
           useMapStore.getState().statusFilter,
+          useMapStore.getState().hideScanned,
           useUserStore.getState().scans
         ),
         cluster: true,

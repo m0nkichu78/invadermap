@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowDown, ArrowUp } from "@phosphor-icons/react";
+import { ArrowDown, ArrowUp, CheckCircle } from "@phosphor-icons/react";
 import type { Invader } from "@/lib/types/invader";
 import { getStatusDotClass } from "@/lib/utils/statusStyle";
+import { useUserStore } from "@/lib/store/userStore";
 
 interface CityInvadersGridProps {
   invaders: Invader[];
@@ -18,6 +19,7 @@ function naturalSort(a: string, b: string): number {
 
 export function CityInvadersGrid({ invaders }: CityInvadersGridProps) {
   const [ascending, setAscending] = useState(false);
+  const userScans = useUserStore((s) => s.scans);
 
   const sorted = [...invaders].sort((a, b) => {
     return ascending ? naturalSort(a.id, b.id) : naturalSort(b.id, a.id);
@@ -45,35 +47,50 @@ export function CityInvadersGrid({ invaders }: CityInvadersGridProps) {
 
       {/* Invaders Grid */}
       <div className="grid grid-cols-3 gap-2">
-        {sorted.map((inv) => (
-          <Link key={inv.id} href={`/invader/${inv.id}`}>
-            <div className="bg-[--surface] border border-[--border] rounded-lg p-2.5 flex flex-col gap-1 hover:border-[--border-hover] transition-colors duration-150 active:scale-[0.97]">
-              <p className="text-xs font-bold text-[--text] leading-tight truncate">
-                {inv.id}
-              </p>
-
-              <div className="flex items-center gap-1">
-                <span
-                  className={`h-1.5 w-1.5 rounded-full shrink-0 ${getStatusDotClass(
-                    inv.status
-                  )}`}
-                />
-                <span className="text-[9px] text-[--text-muted] truncate">
-                  {inv.status}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between mt-auto pt-1">
-                <span className="text-[10px] bg-[--accent-dim] text-accent font-mono tracking-wider px-1.5 py-0.5 rounded">
-                  {inv.points}
-                </span>
-                {!inv.hasLocation && (
-                  <span className="text-[9px] text-[--text-muted]">no gps</span>
+        {sorted.map((inv) => {
+          const isScanned = userScans[inv.id] === "scanned";
+          return (
+            <Link key={inv.id} href={`/invader/${inv.id}`}>
+              <div
+                className="bg-[--surface] border border-[--border] rounded-lg p-2.5 flex flex-col gap-1 hover:border-[--border-hover] transition-all duration-150 active:scale-[0.97] relative"
+                style={{ opacity: isScanned ? 0.5 : 1 }}
+              >
+                {/* Scanned Indicator */}
+                {isScanned && (
+                  <CheckCircle
+                    size={16}
+                    weight="fill"
+                    className="absolute top-1.5 right-1.5 text-success"
+                  />
                 )}
+
+                <p className="text-xs font-bold text-[--text] leading-tight truncate">
+                  {inv.id}
+                </p>
+
+                <div className="flex items-center gap-1">
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full shrink-0 ${getStatusDotClass(
+                      inv.status
+                    )}`}
+                  />
+                  <span className="text-[9px] text-[--text-muted] truncate">
+                    {inv.status}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between mt-auto pt-1">
+                  <span className="text-[10px] bg-[--accent-dim] text-accent font-mono tracking-wider px-1.5 py-0.5 rounded">
+                    {inv.points}
+                  </span>
+                  {!inv.hasLocation && (
+                    <span className="text-[9px] text-[--text-muted]">no gps</span>
+                  )}
+                </div>
               </div>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          );
+        })}
       </div>
     </>
   );

@@ -3,18 +3,7 @@ import { invadersByCity } from "@/lib/data/invaders";
 import { getCityName } from "@/lib/data/cityNames";
 import { BackButton } from "@/components/ui/BackButton";
 import { CityInvadersGrid } from "@/components/cities/CityInvadersGrid";
-
-function MiniStatusBar({ ok, damaged, destroyed, total }: {
-  ok: number; damaged: number; destroyed: number; total: number;
-}) {
-  return (
-    <div className="w-full h-1 bg-[--surface-2] rounded-full overflow-hidden flex mt-2">
-      {ok        > 0 && <div className="h-full bg-success  shrink-0" style={{ width: `${(ok / total) * 100}%` }}        />}
-      {damaged   > 0 && <div className="h-full bg-warning  shrink-0" style={{ width: `${(damaged / total) * 100}%` }}   />}
-      {destroyed > 0 && <div className="h-full bg-danger   shrink-0" style={{ width: `${(destroyed / total) * 100}%` }} />}
-    </div>
-  );
-}
+import { CityHeader } from "@/components/cities/CityHeader";
 
 export default function CityPage({ params }: { params: { slug: string } }) {
   const cityCode = params.slug.toUpperCase();
@@ -28,6 +17,7 @@ export default function CityPage({ params }: { params: { slug: string } }) {
   ).length;
   const destroyed = invaders.filter((i) => i.status === "destroyed").length;
   const activePct = Math.round((ok / invaders.length) * 100);
+  const totalPoints = invaders.reduce((s, i) => s + i.points, 0);
 
   return (
     <div className="min-h-dvh bg-[--bg] pb-24">
@@ -43,13 +33,16 @@ export default function CityPage({ params }: { params: { slug: string } }) {
           </div>
         </div>
 
-        <p className="text-xs text-[--text-muted]">
-          <span className="text-[--text]">{invaders.length}</span> invaders ·{" "}
-          <span className="text-success">{activePct}%</span> actifs ·{" "}
-          <span className="text-accent">{invaders.reduce((s, i) => s + i.points, 0).toLocaleString()}</span> pts
-        </p>
-
-        <MiniStatusBar ok={ok} damaged={damaged} destroyed={destroyed} total={invaders.length} />
+        <CityHeader
+          cityCode={cityCode}
+          cityName={getCityName(cityCode)}
+          invaders={invaders}
+          totalPoints={totalPoints}
+          ok={ok}
+          damaged={damaged}
+          destroyed={destroyed}
+          activePct={activePct}
+        />
       </div>
 
       <div className="px-3 pt-4">

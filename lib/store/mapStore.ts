@@ -22,6 +22,7 @@ interface MapState {
   proximityRadius: RadiusStep;
   proximityActive: boolean;
   statusFilter: StatusFilterKey;
+  hideScanned: boolean;
   lastCenter: [number, number] | null;
   lastZoom: number;
   isTracking: boolean;
@@ -30,6 +31,7 @@ interface MapState {
   setProximityRadius: (radius: RadiusStep) => void;
   setProximityActive: (active: boolean) => void;
   setStatusFilter: (filter: StatusFilterKey) => void;
+  setHideScanned: (v: boolean) => void;
   setLastView: (center: [number, number], zoom: number) => void;
   setTracking: (v: boolean) => void;
 }
@@ -39,6 +41,7 @@ export const useMapStore = create<MapState>((set) => ({
   proximityRadius: 500,
   proximityActive: false,
   statusFilter: "Tous",
+  hideScanned: false,
   lastCenter: null,
   lastZoom: 12,
   isTracking: false,
@@ -47,6 +50,7 @@ export const useMapStore = create<MapState>((set) => ({
   setProximityRadius: (radius) => set({ proximityRadius: radius }),
   setProximityActive: (active) => set({ proximityActive: active }),
   setStatusFilter: (filter) => set({ statusFilter: filter }),
+  setHideScanned: (v) => set({ hideScanned: v }),
   setLastView: (center, zoom) => set({ lastCenter: center, lastZoom: zoom }),
   setTracking: (v) => set({ isTracking: v }),
 }));
