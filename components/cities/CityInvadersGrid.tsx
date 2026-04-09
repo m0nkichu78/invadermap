@@ -11,8 +11,8 @@ interface CityInvadersGridProps {
 }
 
 function naturalSort(a: string, b: string): number {
-  const [cityA, numA] = a.split("_");
-  const [cityB, numB] = b.split("_");
+  const [, numA] = a.split("_");
+  const [, numB] = b.split("_");
   return parseInt(numA, 10) - parseInt(numB, 10);
 }
 
