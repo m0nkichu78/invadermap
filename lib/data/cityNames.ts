@@ -18,7 +18,7 @@ export const CITY_NAMES: Record<string, string> = {
   CAZ:   "Carcassonne",
   CCU:   "Calcutta",
   CHAR:  "Chartres",
-  CLR:   "Colmar",
+  CLR:   "Clermont-Ferrand",
   CON:   "Concarneau",
   DHK:   "Dhaka",
   DIJ:   "Dijon",
