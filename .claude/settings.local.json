@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && echo \"y\" | npx create-next-app@latest . --typescript --tailwind --app --no-src-dir --no-import-alias --eslint 2>&1)",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && printf 'No\\\\nNo\\\\n' | npx create-next-app@latest . --typescript --tailwind --app --no-src-dir --no-import-alias --eslint 2>&1)",
+      "Bash(cp -r /tmp/invadermap-init/. \"/Users/mathieu/Documents/Projets IA 🤖/invadermap/\" --no-target-directory 2>&1 || rsync -av --exclude='.claude' /tmp/invadermap-init/ \"/Users/mathieu/Documents/Projets IA 🤖/invadermap/\" 2>&1)",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && npm install mapbox-gl zustand @supabase/supabase-js @supabase/ssr 2>&1)",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && npm install -D @types/mapbox-gl 2>&1)",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && npm install class-variance-authority clsx tailwind-merge lucide-react 2>&1)",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && npx tsc --noEmit 2>&1)",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && cat package.json | python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('next:', d['dependencies'].get\\('next',''\\)\\); print\\('react:', d['dependencies'].get\\('react',''\\)\\); print\\('mapbox-gl:', d['dependencies'].get\\('mapbox-gl',''\\)\\); print\\('zustand:', d['dependencies'].get\\('zustand',''\\)\\); print\\('@supabase/supabase-js:', d['dependencies'].get\\('@supabase/supabase-js',''\\)\\); print\\('@supabase/ssr:', d['dependencies'].get\\('@supabase/ssr',''\\)\\)\")",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && npm run dev)",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && curl -L https://raw.githubusercontent.com/goguelnikov/SpaceInvaders/main/world_space_invaders.json -o data/world_space_invaders.json 2>&1 && echo \"Done\" && wc -l data/world_space_invaders.json && wc -c data/world_space_invaders.json)",
+      "WebFetch(domain:github.com)",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && curl -L https://raw.githubusercontent.com/goguelnikov/SpaceInvaders/main/world_space_invaders_V05.json -o data/world_space_invaders.json && echo \"Done\" && wc -c data/world_space_invaders.json)",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && node -e \"const d = require\\('./data/world_space_invaders.json'\\); const keys = Array.isArray\\(d\\) ? Object.keys\\(d[0]\\) : Object.keys\\(d\\); console.log\\('Type:', Array.isArray\\(d\\) ? 'Array' : 'Object'\\); console.log\\('Length:', Array.isArray\\(d\\) ? d.length : Object.keys\\(d\\).length\\); console.log\\('Keys:', JSON.stringify\\(keys\\)\\); if\\(Array.isArray\\(d\\)\\) console.log\\('First item:', JSON.stringify\\(d[0], null, 2\\)\\);\")",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && node -e \"\nconst data = require\\('./data/world_space_invaders.json'\\);\n\n// First 3 entries\nconsole.log\\('=== FIRST 3 ENTRIES ==='\\);\ndata.slice\\(0, 3\\).forEach\\(\\(d, i\\) => console.log\\(i, JSON.stringify\\(d\\)\\)\\);\n\n// Field analysis\nconsole.log\\('\\\\n=== FIELD PRESENCE ==='\\);\nconst fields = {};\ndata.forEach\\(d => {\n  Object.entries\\(d\\).forEach\\(\\([k, v]\\) => {\n    if \\(!fields[k]\\) fields[k] = { count: 0, types: new Set\\(\\), emptyCount: 0, sample: [] };\n    fields[k].count++;\n    fields[k].types.add\\(typeof v\\);\n    if \\(v === '' || v === null || v === undefined\\) fields[k].emptyCount++;\n    if \\(fields[k].sample.length < 5 && v !== ''\\) fields[k].sample.push\\(v\\);\n  }\\);\n}\\);\nObject.entries\\(fields\\).forEach\\(\\([k, v]\\) => {\n  console.log\\(k + ': present=' + v.count + '/4285, empty=' + v.emptyCount + ', types=' + [...v.types] + ', samples=' + JSON.stringify\\(v.sample\\)\\);\n}\\);\n\")",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && node -e \"\nconst data = require\\('./data/world_space_invaders.json'\\);\n\n// Unique cities\nconst cities = [...new Set\\(data.map\\(d => d.city\\)\\)].sort\\(\\);\nconsole.log\\('=== UNIQUE CITIES \\(' + cities.length + '\\) ==='\\);\nconsole.log\\(cities.join\\(', '\\)\\);\n\n// Status values\nconst statuses = [...new Set\\(data.map\\(d => d.status\\)\\)].sort\\(\\);\nconsole.log\\('\\\\n=== STATUS VALUES ==='\\);\nstatuses.forEach\\(s => console.log\\(s + ': ' + data.filter\\(d => d.status === s\\).length\\)\\);\n\n// Points values\nconst points = [...new Set\\(data.map\\(d => d.points\\)\\)].sort\\(\\(a,b\\) => +a - +b\\);\nconsole.log\\('\\\\n=== POINTS VALUES ==='\\);\nconsole.log\\(points.join\\(', '\\)\\);\n\n// Entries with missing lat/lng\nconsole.log\\('\\\\n=== MISSING LAT/LNG SAMPLES ==='\\);\ndata.filter\\(d => d.lat === ''\\).slice\\(0, 3\\).forEach\\(d => console.log\\(JSON.stringify\\(d\\)\\)\\);\n\")",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && npm install -D tsx 2>&1 | tail -3)",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && npm run seed:check 2>&1)",
+      "Bash(ls \"/Users/mathieu/Documents/Projets IA 🤖/invadermap/.env\"* 2>/dev/null || echo \"no env files\")",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && npx shadcn@latest add dialog input --yes 2>&1 | tail -10)",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && npm run seed:db 2>&1)",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && npm install @heroicons/react tailwind-scrollbar-hide 2>&1 | tail -5)",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && npm uninstall @heroicons/react && npm install @phosphor-icons/react 2>&1 | tail -5)",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && npm install @phosphor-icons/react 2>&1 | tail -5)",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && node -e \"require\\('@phosphor-icons/react'\\); console.log\\('ok'\\)\" 2>&1)",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && npm install framer-motion 2>&1 | tail -4)",
+      "Bash(grep -r \"gradient-primary\\\\|gradient-card\\\\|glow-border\\\\|text-gradient-primary\\\\|gradient-glow\\\\|Space_Grotesk\\\\|font-space-grotesk\\\\|--color-\\\\|rounded-2xl\\\\|violet-slider\\\\|@heroicons\\\\|explore.*href\\\\|href.*explore\" \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" --include=\"*.tsx\" --include=\"*.ts\" --include=\"*.css\" -l 2>/dev/null | grep -v node_modules)",
+      "Bash(grep -r \"Space.Grotesk\\\\|space-grotesk\\\\|font-space\\\\|Inter\\\\|system-ui\" \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" --include=\"*.tsx\" --include=\"*.ts\" --include=\"*.css\" 2>/dev/null | grep -v node_modules | grep -v \".next\")",
+      "Bash(node -e \"\nconst data = require\\('/Users/mathieu/Documents/Projets\\\\ IA\\\\ 🤖/invadermap/data/world_space_invaders.json'\\);\nconst codes = [...new Set\\(data.map\\(i => i.city\\)\\)].sort\\(\\);\nconsole.log\\(codes.join\\('\\\\n'\\)\\);\nconsole.log\\('Total:', codes.length\\);\n\")",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && npm install --save-dev sharp 2>&1 | tail -5)",
+      "Bash(cd \"/Users/mathieu/Documents/Projets IA 🤖/invadermap\" && npm run icons)",
+      "Bash(git add:*)"
+    ]
+  }
+}
