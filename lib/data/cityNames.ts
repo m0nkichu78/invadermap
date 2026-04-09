@@ -41,6 +41,7 @@ export const CITY_NAMES: Record<string, string> = {
   LA:    "Los Angeles",
   LBR:   "Libreville",
   LCT:   "La Ciotat",
+  LDN:   "Londres",
   LIL:   "Lille",
   LJU:   "Ljubljana",
   LSN:   "Lausanne",
