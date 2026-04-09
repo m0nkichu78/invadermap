@@ -34,8 +34,6 @@ export default function CityPage({ params }: { params: { slug: string } }) {
         </div>
 
         <CityHeader
-          cityCode={cityCode}
-          cityName={getCityName(cityCode)}
           invaders={invaders}
           totalPoints={totalPoints}
           ok={ok}

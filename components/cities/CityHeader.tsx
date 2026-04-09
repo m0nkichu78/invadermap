@@ -4,8 +4,6 @@ import { useUserStore } from "@/lib/store/userStore";
 import type { Invader } from "@/lib/types/invader";
 
 interface CityHeaderProps {
-  cityCode: string;
-  cityName: string;
   invaders: Invader[];
   totalPoints: number;
   ok: number;
@@ -27,8 +25,6 @@ function MiniStatusBar({ ok, damaged, destroyed, total }: {
 }
 
 export function CityHeader({
-  cityCode,
-  cityName,
   invaders,
   totalPoints,
   ok,
